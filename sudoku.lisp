@@ -103,17 +103,18 @@
 
 ;;; permet de valider si la grille est correctement remplit
 (defun solver (board)
-  (let ((sommeL 0)
-	(sommeC 0)
-	(solved T))
+  (let ((solved T)
+	(tabC (make-array 9))
+	(tabL (make-array 9)))    
     (loop for i from 0 to 8
        do
 	 (loop for j from 0 to 8
 	    do
-	      (setq sommeL (+ sommeL (aref board j i)))
-	      (setq sommeC (+ sommeC (aref board i j))))
-
-	 (if (or (not (= sommeL 45)) (not (= sommeC 45)))
-	     (setq solved nil)))
+	      (if (null (find (aref board j i) tabC))
+		  (setf (aref tabC (array-dimension tabC 0)) (aref board j i))
+		  (setq solved nil))
+	      (if (null (find (aref board i j) tabL))
+		  (setf (aref tabL (array-dimension tabL 0)) (aref board i j))
+		  (setq solved nil))))
     (if (not (eq solved nil))
 	(setq solved T))))
