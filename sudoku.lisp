@@ -72,6 +72,11 @@
 (defun get-value-at (x y)
   (aref board x y))
 
+;; (defun is-correct(x y &optinal z)
+;;  (if (and (> x 0) (< x 10) (> y 0) (< y 10))
+      ;; ON WORK
+;;      ))
+
 (defun change-value (x y z)
   (setq y (coerce y 'character))
   (if (and (> x 0)
@@ -84,3 +89,21 @@
 	    ((and (> (char-code y) 96)
 		  (< (char-code y) 106))
 	     (setf (aref board (1- x) (mod (char-code y) 97) ) z)))))
+
+
+;;; permet de valider si la grille est correctement remplit
+(defun solver (board)
+  (let ((sommeL 0)
+	(sommeC 0)
+	(solved T))
+    (loop for i from 0 to 8
+       do
+	 (loop for j from 0 to 8
+	    do
+	      (setq sommeL (+ sommeL (aref board j i)))
+	      (setq sommeC (+ sommeC (aref board i j))))
+
+	 (if (or (not (= sommeL 45)) (not (= sommeC 45)))
+	     (setq solved nil)))
+    (if (not (eq solved nil))
+	(setq solved T))))
