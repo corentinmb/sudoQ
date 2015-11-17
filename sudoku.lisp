@@ -29,6 +29,18 @@
      (5 0 0 2 0 0 0 0 7))))
   grid-test)
 
+(defun sudoku-t-solved ()
+  (defparameter grid-test-solved (make-array '(9 9) :initial-contents '((3 9 4 8 5 2 6 7 1)
+    (2 6 8 3 7 1 4 5 9)
+    (5 7 1 6 9 4 8 2 3)
+    (1 4 5 7 8 3 9 6 2)
+    (6 8 2 9 4 5 3 1 7)
+    (9 3 7 1 2 6 5 8 4)
+    (4 1 3 5 6 7 2 9 8)
+    (7 5 9 2 3 8 1 4 6)
+    (8 2 6 4 1 9 7 3 5))))
+  grid-test-solved)
+
 (defun play()
   (princ "C L ? ")
   (let ((currentY (read))
@@ -72,11 +84,26 @@
 (defun get-value-at (x y)
   (aref board x y))
 
-;; (defun is-correct(x y &optinal z)
-;;  (if (and (> x 0) (< x 10) (> y 0) (< y 10))
-      ;; ON WORK
-;;      ))
-
+(defun is-correct(x y &optional z)
+  (setq y (coerce y 'character))
+  (if (and (> x 0)
+	   (< x 10)
+	   (or
+	    (and
+	     (> (char-code y) 64)
+	     (< (char-code y) 74))
+	    (and
+	     (> (char-code y) 96)
+	     (< (char-code y) 106))))
+      (if (or
+	   (not z)
+	   (and
+	    (> z 0)
+	    (< z 10)))
+	  T
+	  NIL)
+      NIL))
+  
 (defun change-value (x y z)
   (setq y (coerce y 'character))
   (if (and (> x 0)
@@ -93,17 +120,18 @@
 
 ;;; permet de valider si la grille est correctement remplit
 (defun solver (board)
-  (let ((sommeL 0)
-	(sommeC 0)
-	(solved T))
+  (let ((solved T)
+	(tabC (make-array 9))
+	(tabL (make-array 9)))
     (loop for i from 0 to 8
        do
 	 (loop for j from 0 to 8
 	    do
-	      (setq sommeL (+ sommeL (aref board j i)))
-	      (setq sommeC (+ sommeC (aref board i j))))
+	      (if (null (find (aref board j i) tabC))
+		  (setf (aref tabC i) (aref board j i))
+		  (setq solved nil))
+	      (if (null (find (aref board i j) tabL))
+		  (setf (aref tabL i) (aref board i j))
+		  (setq solved nil))))))
 
-	 (if (or (not (= sommeL 45)) (not (= sommeC 45)))
-	     (setq solved nil)))
-    (if (not (eq solved nil))
-	(setq solved T))))
+;; Remettre tabC et tabL à 0
