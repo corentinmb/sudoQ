@@ -1,11 +1,11 @@
-(;;; CONSTANTS VARIABLES
+;;; CONSTANTS VARIABLES
 (defparameter header "   | A B C | D E F | G H I |")
 (defparameter stars "****************************")
 (defparameter board (make-array '(9 9) :initial-element 0))
 (defparameter solved nil)
-(defparameter currentX 1)
-(defparameter currentY #\a)
-(defparameter currentValue 1)
+(defparameter currentX -1)
+(defparameter currentY ".")
+(defparameter currentValue -1)
 
 ;; MAIN PROC
 (defun sudoku (param_board)
@@ -42,12 +42,20 @@
   grid-test-solved)
 
 (defun play()
-  (princ "C L ? ")
-  (let ((currentY (read))
-	(currentX (read)))
-    (princ "Value ? ")
-    (let ((currentValue (read)))
-      (change-value currentX currentY currentValue))))
+  (setq currentX -1)
+  (setq currentY ".")
+  (setq currentValue -1)
+  (loop while (not (is-correct currentX currentY currentValue))
+     do
+       (print-newline)
+       (princ "C L ? ")
+       (setq currentY (read))
+       (setq currentX (read))
+       (princ "Value ? ")
+       (setq currentValue (read))
+       (if (not (is-correct currentX currentY currentValue))
+	   (princ "[ERREUR] Coordonnées et/ou Valeur incorrecte !")))
+  (change-value currentX currentY currentValue))
   
 
 (defun print-board ()
