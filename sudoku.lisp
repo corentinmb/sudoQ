@@ -1,4 +1,4 @@
-;;; CONSTANTS VARIABLES
+(;;; CONSTANTS VARIABLES
 (defparameter header "   | A B C | D E F | G H I |")
 (defparameter stars "****************************")
 (defparameter board (make-array '(9 9) :initial-element 0))
@@ -118,8 +118,8 @@
 	     (setf (aref board (1- x) (mod (char-code y) 97) ) z)))))
 
 
-;;; permet de valider si la grille est correctement remplit
-(defun solver (board)
+;;; permet de valider si la grille est correctement remplie
+(defun is-solved (board)
   (let ((solved T)
 	(tabC (make-array 9))
 	(tabL (make-array 9)))
@@ -128,10 +128,54 @@
 	 (loop for j from 0 to 8
 	    do
 	      (if (null (find (aref board j i) tabC))
-		  (setf (aref tabC i) (aref board j i))
+		  (setf (aref tabC j) (aref board j i))
 		  (setq solved nil))
 	      (if (null (find (aref board i j) tabL))
-		  (setf (aref tabL i) (aref board i j))
-		  (setq solved nil))))))
+		  (setf (aref tabL j) (aref board i j))
+		  (setq solved nil)))
+	 (setq tabC (make-array 9))
+	 (setq tabL (make-array 9)))
+	solved))
 
-;; Remettre tabC et tabL à 0
+;;; IA HONTEUSEMENT POMPÉE
+
+(defun row-neighbors (row column grid &aux (neighbors '()))
+  (dotimes (i 9 neighbors)
+    (let ((x (aref grid row i)))
+      (unless (or (eq 0 x) (= i column))
+        (push x neighbors)))))
+ 
+(defun column-neighbors (row column grid &aux (neighbors '()))
+  (dotimes (i 9 neighbors)
+    (let ((x (aref grid i column)))
+      (unless (or (eq x 0) (= i row))
+        (push x neighbors)))))
+ 
+(defun square-neighbors (row column grid &aux (neighbors '()))
+  (let* ((rmin (* 3 (floor row 3)))    (rmax (+ rmin 3))
+         (cmin (* 3 (floor column 3))) (cmax (+ cmin 3)))
+    (do ((r rmin (1+ r))) ((= r rmax) neighbors)
+      (do ((c cmin (1+ c))) ((= c cmax))
+        (let ((x (aref grid r c)))
+          (unless (or (eq x 0) (= r row) (= c column))
+            (push x neighbors)))))))
+ 
+(defun choices (row column grid)
+  (nset-difference
+   (list 1 2 3 4 5 6 7 8 9)
+   (nconc (row-neighbors row column grid)
+          (column-neighbors row column grid)
+          (square-neighbors row column grid))))
+ 
+(defun solve (grid &optional (row 0) (column 0))
+  (cond
+   ((= row 9)
+    grid)
+   ((= column 9)
+    (solve grid (1+ row) 0))
+   ((not (eq 0 (aref grid row column)))
+    (solve grid row (1+ column)))
+   (t (dolist (choice (choices row column grid) (setf (aref grid row column) 0))
+        (setf (aref grid row column) choice)
+        (when (eq grid (solve grid row (1+ column)))
+          (return grid))))))
