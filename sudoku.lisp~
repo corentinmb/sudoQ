@@ -140,22 +140,19 @@
      (print-board)))
 
 (defun solve(x y)
-  (if (not (= (get-value-at y x) 0))
+  (if (not (= (get-value-at x y) 0))
       (progn
 	(if (is-verified x y)
 	    (progn
-	      (print (list x y))
 	      (if (and (= x 8) (= y 8))
 		  T)
 	      (let ((nx (1+ x))
 		    (ny y))
-		;;(print (list nx ny))
-		(if (>= nx 9)
-		  (progn
-		    (setq nx 0)
-		    (setq ny (1+ ny))))
-		(solve nx ny)))
-      NIL)))
+		(when (>= nx 9)
+		  (setq nx 0)
+		  (setq ny (1+ ny))
+		(solve nx ny)))))
+      NIL)
   (loop for val from 1 to 9
      do
        (change-value-solver x y val)
@@ -165,11 +162,9 @@
 		 T)
 	     (let ((nx (1+ x))
 		   (ny y))
-	       ;; (print (list nx ny))
-	       (if (>= nx 9)
-		   (progn
-		     (setq nx 0)
-		     (setq ny (1+ ny))))
+	       (when (>= nx 9)
+		 (setq nx 0)
+		 (setq ny (1+ ny)))
 	       (if (solve nx ny)
 		   T)))))
   (change-value-solver x y 0)
@@ -178,42 +173,42 @@
 
 
 (defun is-verified(x y)
-  (let ((val (get-value-at y x))
+  (let ((val (get-value-at x y))
 	(valver 0)
 	(xbox 0)
 	(ybox 0)
 	(xver 0)
 	(yver 0))    
-     ;  (print (list x y val))
-     (loop for xver from 0 to 8
+    (loop for xver from 0 to 8
        do
 	 (if (= xver x)
-	     (continue))
-	 (setq valver (get-value-at y xver))
+	     ()
+	     ())
+	 (setq valver (get-value-at xver y))
 	 (if (= valver val)
 	     NIL))
     (loop for yver from 0 to 8
        do
 	 (if (= yver y)
-	     (continue))
-	 (setq valver (get-value-at yver x))
+	     ()
+	     ())
+	 (setq valver (get-value-at x yver))
 	 (if (= valver val)
 	     NIL))
     (setq xbox (floor x 3))
     (setq ybox (floor y 3))
-    (setq yver (* ybox 3))
-    (setq xver (* xbox 3))
-    (loop for xver from (* xbox 3) to (+ (* xbox 3) 2)
+    (loop for yver from (* ybox 3) to (+ (* ybox 3) 2)
        do
-	 (loop for yver from (* ybox 3) to (+ (* ybox 3) 2)
+	 (loop for xver from (* xbox 3) to (+ (* xbox 3) 2)
 	    do
 	      (if (and (= xver x) (= yver y))
-		  (continue))
-	      (setq valver (get-value-at yver xver))
+		  ()
+		  ())
+	      (setq valver (get-value-at xver yver))
 	      (if (= valver val)
 		  NIL))))
   T))
 
 
 (defun change-value-solver(x y val)
-  (setf (aref board y x) val)))
+  (setf (aref board x y) val)))
