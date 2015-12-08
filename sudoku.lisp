@@ -6,6 +6,8 @@
 (defparameter currentX -1)
 (defparameter currentY ".")
 (defparameter currentValue -1)
+(defparameter row 0)
+(defparameter col 0)
 
 ;; MAIN PROC
 (defun sudoku (param_board)
@@ -135,85 +137,61 @@
 
 ;;;IA by Corentin
 
-(defun solve-sudoku()
-  (if (solve 0 0)
-     (print-board)))
+(defun solve()
+  (if (solve-sudoku)
+      (print-board)))
 
-(defun solve(x y)
-  (if (not (= (get-value-at y x) 0))
-      (progn
-	(if (is-verified x y)
-	    (progn
-	      (print (list x y))
-	      (if (and (= x 8) (= y 8))
-		  T)
-	      (let ((nx (1+ x))
-		    (ny y))
-		;;(print (list nx ny))
-		(if (>= nx 9)
-		  (progn
-		    (setq nx 0)
-		    (setq ny (1+ ny))))
-		(solve nx ny)))
-      NIL)))
-  (loop for val from 1 to 9
-     do
-       (change-value-solver x y val)
-       (if (is-verified x y)
-	   (progn
-	     (if (and (= x 8) (= y 8))
-		 T)
-	     (let ((nx (1+ x))
-		   (ny y))
-	       ;; (print (list nx ny))
-	       (if (>= nx 9)
-		   (progn
-		     (setq nx 0)
-		     (setq ny (1+ ny))))
-	       (if (solve nx ny)
-		   T)))))
-  (change-value-solver x y 0)
+(defun solve-sudoku ()
+  (if (not (findLoc))
+      T)
+  (loop for num from 1 to 9
+       do
+       (when (isSafe row col num)
+	 (change-value-solver row col num)
+	 (when (solve-sudoku)
+	   T)
+	 (change-value-solver row col 0)))
   NIL)
 
-
-
-(defun is-verified(x y)
-  (let ((val (get-value-at y x))
-	(valver 0)
-	(xbox 0)
-	(ybox 0)
-	(xver 0)
-	(yver 0))    
-     ;  (print (list x y val))
-     (loop for xver from 0 to 8
+(defun findLoc ()
+  (loop for row from 0 to 8
        do
-	 (if (= xver x)
-	     (continue))
-	 (setq valver (get-value-at y xver))
-	 (if (= valver val)
-	     NIL))
-    (loop for yver from 0 to 8
-       do
-	 (if (= yver y)
-	     (continue))
-	 (setq valver (get-value-at yver x))
-	 (if (= valver val)
-	     NIL))
-    (setq xbox (floor x 3))
-    (setq ybox (floor y 3))
-    (setq yver (* ybox 3))
-    (setq xver (* xbox 3))
-    (loop for xver from (* xbox 3) to (+ (* xbox 3) 2)
-       do
-	 (loop for yver from (* ybox 3) to (+ (* ybox 3) 2)
+       (loop for col from 0 to 8
 	    do
-	      (if (and (= xver x) (= yver y))
-		  (continue))
-	      (setq valver (get-value-at yver xver))
-	      (if (= valver val)
-		  NIL))))
-  T))
+	    (if (= (get-value-at row col) 0)
+		T)))
+  NIL)
 
+(defun UsedInRow (row num)
+  (loop for col from 0 to 8
+       do
+       (if (= (get-value-at row col) num)
+	   T))
+  NIL)
 
-(defun change-value-solver(x y val)
-  (setf (aref board y x) val)))
+(defun UsedInCol (col num)
+  (loop for row from 0 to 8
+       do
+       (if (= (get-value-at row col) num)
+	   T))
+  NIL)
+
+(defun UsedInBox(boxSRow boxSCol num)
+  (loop for row from 0 to 2
+       do
+       (loop for col from 0 to 2
+	  do
+	    (if (= (get-value-at (+ row boxSRow) (+ col boxSCol)) num)
+		T)))
+  NIL)
+
+(defun isSafe (row col num)
+  (if (and 
+       (not (UsedInRow row num))
+       (not (UsedInCol col num))
+       (not (UsedInBox (- row (mod row 3)) (- col (mod col 3)) num)))
+      T
+      NIL))
+
+(defun change-value-solver (x y num)
+  (setf (aref board x y) num))
