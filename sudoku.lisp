@@ -8,15 +8,12 @@
 ;; Created: 31-10-2015
 
 
+
 ;;; Constants variables defined for the program
 (defparameter header "   | A B C | D E F | G H I |")
 (defparameter stars "****************************")
-<<<<<<< HEAD
 (defparameter actual_board (make-array '(9 9) :initial-element 0))
-=======
-(defparameter board (make-array '(9 9) :initial-element 0))
 (defparameter nModifBoard (make-array '(9 9) :initial-element 0))
->>>>>>> fdf56f9b25f982394b5c216d1fea123cd2483fa5
 (defparameter solved nil)
 (defparameter currentX -1)
 (defparameter currentY ".")
@@ -30,19 +27,12 @@
 							       (0 6 0 5 0 0 0 0 0)
 							       (0 8 0 0 1 6 0 0 0)
 							       (5 0 0 2 0 0 0 0 7))))
-<<<<<<< HEAD
 
 ;;; SUDOKU function
 ;;; This is the main function to run the game
 (defun sudoku (board)
   (defparameter actual_board board)
-=======
-;; MAIN PROC
-(defun sudoku (param_board)
-  ;; COPY BOARD IN PARAM INTO THE GLOBAL VAR
-  (defparameter board param_board)
-  (setf nModifBoard (copy-array param_board))
->>>>>>> fdf56f9b25f982394b5c216d1fea123cd2483fa5
+  (setf nModifBoard (copy-array board))
   (loop while (not solved)
      do
        (print-board)
@@ -166,7 +156,7 @@
 	 (setq tabL (make-array 9)))
 	solved))
 
-;;; IA aléatoire
+;;; IA aleatoire
 
 (defun IArandom(grid)
   (let ((tabNbOc (make-array '(3 3) :initial-contents '((0 0 0) (0 0 0) (0 0 0))))
@@ -176,10 +166,10 @@
        do
          (loop for j from 0 to 2
             do
-	      ;;; remplissage aléatoire de la matrice
+	      ;;; remplissage aleatoire de la matrice
 	      (aleaCarre i j grid)))                    
 
-	 ;;; boucle while permettant de reset les carrés
+	 ;;; boucle while permettant de reset les carres
 	 (loop do
 
 	      (let ((nbOc 0))
@@ -192,8 +182,8 @@
 			      (setf nbOc (aref tabNbOc i j) carreMax (list i j)))))
 		(aleaCarre (car carreMax) (car (cdr carreMax)) grid))
 
-	      (print-board)
-	      (print tabNbOc)
+	     (print-board)
+	     (print tabNbOc)
 	      (setf tabNbOc (make-array '(3 3)))
 	      
 	    while(eq (is-solved grid) nil))
@@ -232,7 +222,7 @@
                           (setf (aref tabOc 2 0) (1+ (aref tabOc 2 0)) (aref tabOc 2 1) (1+ (aref tabOc 2 1)) (aref tabOc 2 2) (1+ (aref tabOc 2 2)))))))
 	 (setf tabC (make-array 9) tabL (make-array 9)))))
 	    
-;;; mélange aléatoirement les valeurs d'un carré
+;;; melange aleatoirement les valeurs d'un carre
 
 (defun aleaCarre(i j grid)
   (let ((valDebI 0)
@@ -250,7 +240,7 @@
 	    (setf valDebJ 6)))
 
     (loop for k from valDebI to (+ valDebI 2)
-       do ;;; mettre les valeurs non modifiables dans la liste des le début
+       do ;;; mettre les valeurs non modifiables dans la liste des le debut
 	 (loop for l from valDebJ to (+ valDebJ 2)
 	    do
 	      (if (= (aref nModifBoard k l) 0)
@@ -259,9 +249,9 @@
 			 (setf rand (1+ (random 9)))
 		       while(> (count rand listeVal) 0))
 		    (setf (aref grid k l) rand listeVal (append listeVal (list rand)))))
-		  (setf listeVal (append listeVal (list (aref nModifBoard k l)))))))(print listeVal)))
+		  (setf listeVal (append listeVal (list (aref nModifBoard k l))))))) (print listeVal)))
 
-;;; fonction générique pour copier un tableau
+;;; fonction generique pour copier un tableau
 
 (defun copy-array (array &key
 			   (element-type (array-element-type array))
