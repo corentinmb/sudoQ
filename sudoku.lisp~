@@ -6,7 +6,15 @@
 (defparameter currentX -1)
 (defparameter currentY ".")
 (defparameter currentValue -1)
-
+(defparameter grid-test (make-array '(9 9) :initial-contents '((1 0 0 0 0 4 0 0 5)
+							       (0 0 0 9 5 0 0 8 0)
+							       (0 0 0 0 0 3 0 9 0)
+							       (0 0 5 0 0 2 0 0 4)
+							       (0 0 1 0 6 0 7 0 0)
+							       (7 0 0 3 0 0 2 0 0)
+							       (0 6 0 5 0 0 0 0 0)
+							       (0 8 0 0 1 6 0 0 0)
+							       (5 0 0 2 0 0 0 0 7))))
 ;; MAIN PROC
 (defun sudoku (param_board)
   ;; COPY BOARD IN PARAM INTO THE GLOBAL VAR
@@ -15,31 +23,6 @@
      do
        (print-board)
        (play)))
-
-;; DEBUG MAIN PROC
-(defun sudoku-t ()
-  (defparameter grid-test (make-array '(9 9) :initial-contents '((1 0 0 0 0 4 0 0 5)
-     (0 0 0 9 5 0 0 8 0)
-     (0 0 0 0 0 3 0 9 0)
-     (0 0 5 0 0 2 0 0 4)
-     (0 0 1 0 6 0 7 0 0)
-     (7 0 0 3 0 0 2 0 0)
-     (0 6 0 5 0 0 0 0 0)
-     (0 8 0 0 1 6 0 0 0)
-     (5 0 0 2 0 0 0 0 7))))
-  grid-test)
-
-(defun sudoku-t-solved ()
-  (defparameter grid-test-solved (make-array '(9 9) :initial-contents '((3 9 4 8 5 2 6 7 1)
-    (2 6 8 3 7 1 4 5 9)
-    (5 7 1 6 9 4 8 2 3)
-    (1 4 5 7 8 3 9 6 2)
-    (6 8 2 9 4 5 3 1 7)
-    (9 3 7 1 2 6 5 8 4)
-    (4 1 3 5 6 7 2 9 8)
-    (7 5 9 2 3 8 1 4 6)
-    (8 2 6 4 1 9 7 3 5))))
-  grid-test-solved)
 
 (defun play()
   (setq currentX -1)
@@ -54,7 +37,7 @@
        (princ "Value ? ")
        (setq currentValue (read))
        (if (not (is-correct currentX currentY currentValue))
-	   (princ "[ERREUR] Coordonnées et/ou Valeur incorrecte !")))
+	   (princ "[ERREUR] Coordonnees et/ou Valeur incorrecte !")))
   (change-value currentX currentY currentValue))
   
 
