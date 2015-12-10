@@ -3,27 +3,26 @@
 (defun IArandom(grid)
   (let ((tabNbOc (make-array '(3 3) :initial-contents '((0 0 0) (0 0 0) (0 0 0))))
         (carreMax '(0 0)))
- 
-    (loop for i from 0 to 8
+    
+    (loop for i from 0 to 2
        do
-         (loop for j from 0 to 8
+         (loop for j from 0 to 2
             do
 	      ;;; remplissage aléatoire de la matrice
-	      (if (= (aref grid i j) 0)
-		  (setf (aref grid i j) (1+ (random 9))))))                    
+	      (aleaCarre i j grid)))                    
 
 	 ;;; boucle while permettant de reset les carrés
 	 (loop do
 
 	      (let ((nbOc 0))
 		(findOcur grid tabNbOc)
-		(aleaCarre (car carreMax) (car (cdr carreMax)) grid)
 		(loop for i from 0 to 2
 		   do
 		     (loop for j from 0 to 2
 			do
 			  (if (> (aref tabNbOc i j) nbOc)
-			      (setf nbOc (aref tabNbOc i j) carreMax (list i j))))))
+			      (setf nbOc (aref tabNbOc i j) carreMax (list i j)))))
+		(aleaCarre (car carreMax) (car (cdr carreMax)) grid))
 
 	      (print-board)
 	      (print tabNbOc)
@@ -83,13 +82,30 @@
 	    (setf valDebJ 6)))
 
     (loop for k from valDebI to (+ valDebI 2)
-       do
+       do ;;; mettre les valeurs non modifiables dans la liste des le début
 	 (loop for l from valDebJ to (+ valDebJ 2)
 	    do
-	      (if (and (= (aref nModifBoard k l) 0))
-		  (let ((rand 0))
-		    (loop do
-			 ;;;(setf (aref grid k l) (1+ (random 9)) listeVal (append listeVal (list (aref grid k l))))
+	      (if (= (aref nModifBoard k l) 0)
+		  (progn (let ((rand 0))
+		    (loop do			 
 			 (setf rand (1+ (random 9)))
 		       while(> (count rand listeVal) 0))
-		    (setf (aref grid k l) rand listeVal (append listeVal (list rand)))))))))
+		    (setf (aref grid k l) rand listeVal (append listeVal (list rand)))))
+		  (setf listeVal (append listeVal (list (aref nModifBoard k l)))))))(print listeVal)))
+
+;;; fonction générique pour copier un tableau
+
+(defun copy-array (array &key
+			   (element-type (array-element-type array))
+			   (fill-pointer (and (array-has-fill-pointer-p array)
+                                      (fill-pointer array)))
+			   (adjustable (adjustable-array-p array)))
+  (let* ((dimensions (array-dimensions array))
+         (new-array (make-array dimensions
+                                :element-type element-type
+                                :adjustable adjustable
+                                :fill-pointer fill-pointer)))
+    (dotimes (i (array-total-size array))
+      (setf (row-major-aref new-array i)
+            (row-major-aref array i)))
+    new-array))
