@@ -107,10 +107,12 @@
 	   (or
 	    (and
 	     (> (char-code y) 64)
-	     (< (char-code y) 74))
+	     (< (char-code y) 74)
+	     (can-be-change (1- x) (mod (char-code y) 65)))
 	    (and
 	     (> (char-code y) 96)
-	     (< (char-code y) 106))))
+	     (< (char-code y) 106)
+	     (can-be-change (1- x) (mod (char-code y) 65))))) 
       (if (or
 	   (not z)
 	   (and
@@ -119,6 +121,13 @@
 	  T
 	  NIL)
       NIL))
+
+;;; CAN-BE-CHANGE function
+;; verify is the coordonate are valid      
+(defun can-be-change (x y)
+  (if (= (aref nModifBoard x y) 0)
+      T
+      nil))
  
 ;;; CHANGE-VALUE function
 ;;; Set a new value z to the cell in x;y
@@ -191,8 +200,8 @@
 	 
 	 ))
 
-;; trouver des occurences
-
+;;; FINDOCUR function
+;;; find occurences into the grid and put them into tabOc
 (defun findOcur(grid tabOc)
   (let ((tabC (make-array 9))
         (tabL (make-array 9)))
@@ -221,9 +230,9 @@
                           (setf (aref tabOc 1 0) (1+ (aref tabOc 1 0)) (aref tabOc 1 1) (1+ (aref tabOc 1 1)) (aref tabOc 1 2) (1+ (aref tabOc 1 2)))
                           (setf (aref tabOc 2 0) (1+ (aref tabOc 2 0)) (aref tabOc 2 1) (1+ (aref tabOc 2 1)) (aref tabOc 2 2) (1+ (aref tabOc 2 2)))))))
 	 (setf tabC (make-array 9) tabL (make-array 9)))))
-	    
-;;; melange aleatoirement les valeurs d'un carre
 
+;;; ALEACARRE function
+;;; shuffle randomly the values that are in a square
 (defun aleaCarre(i j grid)
   (let ((valDebI 0)
 	(valDebJ 0)
@@ -240,7 +249,7 @@
 	    (setf valDebJ 6)))
 
     (loop for k from valDebI to (+ valDebI 2)
-       do ;;; mettre les valeurs non modifiables dans la liste des le debut
+       do
 	 (loop for l from valDebJ to (+ valDebJ 2)
 	    do
 	      (if (= (aref nModifBoard k l) 0)
@@ -251,8 +260,8 @@
 		    (setf (aref grid k l) rand listeVal (append listeVal (list rand)))))
 		  (setf listeVal (append listeVal (list (aref nModifBoard k l))))))) (print listeVal)))
 
-;;; fonction generique pour copier un tableau
-
+;;; COPY-ARRAY function
+;;; return a copy of the given array
 (defun copy-array (array &key
 			   (element-type (array-element-type array))
 			   (fill-pointer (and (array-has-fill-pointer-p array)
