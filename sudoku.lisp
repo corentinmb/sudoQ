@@ -173,7 +173,9 @@
 	 (setq tabL (make-array 9)))
 	solved))
 
-	;;; Main IA
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Main IA
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter *grid* (make-array '(9 9) :initial-element 0))
 (defparameter *list-of-plays* '())
@@ -258,7 +260,9 @@
     (setf *list-of-plays* (cdr *list-of-plays*))
     (values (first cell) (second cell) (third cell))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Random IA (not really working, but the idea is here)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun IArandom(grid)
   (let ((tabNbOc (make-array '(3 3) :initial-contents '((0 0 0) (0 0 0) (0 0 0))))
