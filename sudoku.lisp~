@@ -1,5 +1,5 @@
 ;;;; sudoku.lisp --- Sudoku Puzzle
-;; Universit� de Bordeaux
+;; Universite de Bordeaux
 ;;
 ;; Author: Corentin Davidenko <corentin.davidenko@etu.u-bordeaux.fr>
 ;; Author: Corentin Moreau <corentin.moreau@etu.u-bordeaux.fr>
@@ -8,15 +8,12 @@
 ;; Created: 31-10-2015
 
 
+
 ;;; Constants variables defined for the program
 (defparameter header "   | A B C | D E F | G H I |")
 (defparameter stars "****************************")
-<<<<<<< HEAD
 (defparameter actual_board (make-array '(9 9) :initial-element 0))
-=======
-(defparameter board (make-array '(9 9) :initial-element 0))
 (defparameter nModifBoard (make-array '(9 9) :initial-element 0))
->>>>>>> fdf56f9b25f982394b5c216d1fea123cd2483fa5
 (defparameter solved nil)
 (defparameter currentX -1)
 (defparameter currentY ".")
@@ -30,19 +27,12 @@
 							       (0 6 0 5 0 0 0 0 0)
 							       (0 8 0 0 1 6 0 0 0)
 							       (5 0 0 2 0 0 0 0 7))))
-<<<<<<< HEAD
 
 ;;; SUDOKU function
 ;;; This is the main function to run the game
 (defun sudoku (board)
   (defparameter actual_board board)
-=======
-;; MAIN PROC
-(defun sudoku (param_board)
-  ;; COPY BOARD IN PARAM INTO THE GLOBAL VAR
-  (defparameter board param_board)
-  (setf nModifBoard (copy-array param_board))
->>>>>>> fdf56f9b25f982394b5c216d1fea123cd2483fa5
+  (setf nModifBoard (copy-array board))
   (loop while (not solved)
      do
        (print-board)
@@ -65,7 +55,7 @@
        (if (not (is-correct currentX currentY currentValue))
 	   (princ "[ERREUR] Coordonnees et/ou Valeur incorrecte !")))
   (change-value currentX currentY currentValue))
-  
+
 ;;; PRINT-BOARD function
 ;;; Print actual_grid on the screen
 (defun print-board ()
@@ -100,7 +90,7 @@
 
 ;;; PRINT-NEWLINE function
 ;;; return a line break
-(defun print-newline () 
+(defun print-newline ()
   (format t "~C" #\linefeed))
 
 ;;; GET-VALUE-AT function
@@ -117,10 +107,12 @@
 	   (or
 	    (and
 	     (> (char-code y) 64)
-	     (< (char-code y) 74))
+	     (< (char-code y) 74)
+	     (can-be-change (1- x) (mod (char-code y) 65)))
 	    (and
 	     (> (char-code y) 96)
-	     (< (char-code y) 106))))
+	     (< (char-code y) 106)
+	     (can-be-change (1- x) (mod (char-code y) 65)))))
       (if (or
 	   (not z)
 	   (and
@@ -129,7 +121,14 @@
 	  T
 	  NIL)
       NIL))
- 
+
+;;; CAN-BE-CHANGE function
+;; verify is the coordonate are valid
+(defun can-be-change (x y)
+  (if (= (aref nModifBoard x y) 0)
+      T
+      nil))
+
 ;;; CHANGE-VALUE function
 ;;; Set a new value z to the cell in x;y
 (defun change-value (x y z)
@@ -166,20 +165,107 @@
 	 (setq tabL (make-array 9)))
 	solved))
 
-;;; IA aléatoire
+	;;; Main IA
+
+	(defun values-of-colon (grid x)
+	  (let ((l '()))
+	  (dotimes (i *sudoku-size*)
+	    (when (not (zerop (aref grid i x)))
+	      (push (aref grid i x) l)))
+	  l))
+
+	(defun values-of-line (grid y)
+	  (let ((l '()))
+	  (dotimes (i *sudoku-size*)
+	    (when (not (zerop (aref grid y i)))
+	      (push (aref grid y i) l)))
+	  l))
+
+	(defun values-of-square (grid x y)
+	  (let* ((lmin (* *sudoku-square-size* (floor x *sudoku-square-size*)))
+		 (lmax (+ *sudoku-square-size* lmin))
+		 (cmin (* *sudoku-square-size* (floor y *sudoku-square-size*)))
+		 (cmax (+ *sudoku-square-size* cmin))
+		 (l '()))
+	    (do ((c cmin (1+ c))) ((= c cmax))
+	      (do ((r lmin (1+ r))) ((= r lmax))
+		(when (> (aref grid r c) 0)
+		  (push (aref grid r c) l))))
+	    l))
+
+
+	(defun missings (presents)
+	  (let ((missings '()))
+	    (do ((i 1 (1+ i))) ((= i (1+ *sudoku-size*)))
+	      (unless (member i presents) (push i missings)))
+	    missings))
+
+	(defun missing-at (x y)
+	  (missings (nconc (values-of-line *grid* x) (values-of-colon *grid* y) (values-of-square *grid* x y))))
+
+	(defparameter *grid* (make-array '(9 9) :initial-element 0))
+	(defparameter *list-of-plays* '())
+	(defparameter *cell-list* '())
+	(defparameter *sudoku-size* 9)
+	(defparameter *sudoku-square-size* 3)
+
+
+	(defun init-standalone (grid)
+	  (setf *grid* (copy-array grid))
+	  (setf *sudoku-size* (car (array-dimensions *grid*)))
+	  (setf *sudoku-square-size* (truncate (sqrt *sudoku-size*)))
+	  (solver (classement-des-cases )))
+
+	(defun classement-des-cases ()
+	  (let ((cells '() ))
+	    (dotimes (i *sudoku-size*)
+	      (dotimes (j *sudoku-size*)
+		(when (= 0 (aref *grid* i j))
+		  (push (cons (cons i j) (count-missings i j)) cells))))
+	    (sort cells #'< :key #'cdr)
+	    ))
+
+	(defun count-missings (x y)
+	  (length (missing-at x y)))
+
+	(defun solver (classed-cells)
+	  (if (null classed-cells)
+	      T
+	      (let* ((cell (car (car classed-cells)))
+		     (x (car cell))
+		     (y (cdr cell))
+		     (boolean nil)
+		     (possibilities (missing-at x y)))
+		(loop for i in possibilities do
+		     (setf (aref *grid* x y) i)
+		     (when (solver (cdr classed-cells))
+			   (push (list x y i) *list-of-plays*)
+			   (setf boolean T)))
+		(if boolean
+		    T
+		    (progn (setf (aref *grid* x y) 0) nil))
+		)))
+
+
+	(defun main-standalone ()
+	  (let ((cell (car *list-of-plays*)))
+	    (setf *list-of-plays* (cdr *list-of-plays*))
+	    (values (first cell) (second cell) (third cell))))
+
+;;; Random IA (not really working, but the idea is here)
 
 (defun IArandom(grid)
   (let ((tabNbOc (make-array '(3 3) :initial-contents '((0 0 0) (0 0 0) (0 0 0))))
         (carreMax '(0 0)))
-    
+
     (loop for i from 0 to 2
        do
          (loop for j from 0 to 2
             do
-	      ;;; remplissage aléatoire de la matrice
-	      (aleaCarre i j grid)))                    
+	      ;;; remplissage aleatoire de la matrice
+	      (aleaCarre i j grid)))
 
-	 ;;; boucle while permettant de reset les carrés
+	 ;;; boucle while permettant de reset les carres
 	 (loop do
 
 	      (let ((nbOc 0))
@@ -192,21 +278,21 @@
 			      (setf nbOc (aref tabNbOc i j) carreMax (list i j)))))
 		(aleaCarre (car carreMax) (car (cdr carreMax)) grid))
 
-	      (print-board)
-	      (print tabNbOc)
+	     (print-board)
+	     (print tabNbOc)
 	      (setf tabNbOc (make-array '(3 3)))
-	      
+
 	    while(eq (is-solved grid) nil))
 
-	 
+
 	 ))
 
-;; trouver des occurences
-
+;;; FINDOCUR function
+;;; find occurences into the grid and put them into tabOc
 (defun findOcur(grid tabOc)
   (let ((tabC (make-array 9))
         (tabL (make-array 9)))
-    
+
     (loop for i from 0 to 8
        do
 	 (loop for j from 0 to 8
@@ -214,31 +300,31 @@
 	    ;;; condition sur les colonnes
               (if (null (find (aref grid j i) tabC))
                   (setf (aref tabC j) (aref grid j i))
- 
+
                   (if (and (> i -1) (< i 3))
                       (setf (aref tabOc 0 0) (1+ (aref tabOc 0 0)) (aref tabOc 1 0) (1+ (aref tabOc 1 0)) (aref tabOc 2 0) (1+ (aref tabOc 2 0)))
                       (if (and (> i 2) (< i 6))
                           (setf (aref tabOc 0 1) (1+ (aref tabOc 0 1)) (aref tabOc 1 1) (1+ (aref tabOc 1 1)) (aref tabOc 2 1) (1+ (aref tabOc 2 1)))
                           (setf (aref tabOc 0 2) (1+ (aref tabOc 0 2)) (aref tabOc 1 2) (1+ (aref tabOc 1 2)) (aref tabOc 2 2) (1+ (aref tabOc 2 2))))))
-             
+
               ;;; condition sur les lignes
               (if (null (find (aref grid i j) tabL))
                   (setf (aref tabL j) (aref grid i j))
- 
+
                   (if (and (> i -1) (< i 3))
 		      (setf (aref tabOc 0 0) (1+ (aref tabOc 0 0)) (aref tabOc 0 1) (1+ (aref tabOc 0 1)) (aref tabOc 0 2) (1+ (aref tabOc 0 2)))
                       (if (and (> i 2) (< i 6))
                           (setf (aref tabOc 1 0) (1+ (aref tabOc 1 0)) (aref tabOc 1 1) (1+ (aref tabOc 1 1)) (aref tabOc 1 2) (1+ (aref tabOc 1 2)))
                           (setf (aref tabOc 2 0) (1+ (aref tabOc 2 0)) (aref tabOc 2 1) (1+ (aref tabOc 2 1)) (aref tabOc 2 2) (1+ (aref tabOc 2 2)))))))
 	 (setf tabC (make-array 9) tabL (make-array 9)))))
-	    
-;;; mélange aléatoirement les valeurs d'un carré
 
+;;; ALEACARRE function
+;;; shuffle randomly the values that are in a square
 (defun aleaCarre(i j grid)
   (let ((valDebI 0)
 	(valDebJ 0)
 	(listeVal '()))
-    
+
     (if (= i 1)
 	(setf valDebI 3)
 	(if (= i 2)
@@ -250,19 +336,19 @@
 	    (setf valDebJ 6)))
 
     (loop for k from valDebI to (+ valDebI 2)
-       do ;;; mettre les valeurs non modifiables dans la liste des le début
+       do
 	 (loop for l from valDebJ to (+ valDebJ 2)
 	    do
 	      (if (= (aref nModifBoard k l) 0)
 		  (progn (let ((rand 0))
-		    (loop do			 
+		    (loop do
 			 (setf rand (1+ (random 9)))
 		       while(> (count rand listeVal) 0))
 		    (setf (aref grid k l) rand listeVal (append listeVal (list rand)))))
-		  (setf listeVal (append listeVal (list (aref nModifBoard k l)))))))(print listeVal)))
+		  (setf listeVal (append listeVal (list (aref nModifBoard k l))))))) (print listeVal)))
 
-;;; fonction générique pour copier un tableau
-
+;;; COPY-ARRAY function
+;;; return a copy of the given array
 (defun copy-array (array &key
 			   (element-type (array-element-type array))
 			   (fill-pointer (and (array-has-fill-pointer-p array)
