@@ -85,5 +85,7 @@
 	
 
 
-(defun main-standalone ())
-  
+(defun main-standalone ()
+  (let ((cell (car *list-of-plays*)))
+    (setf *list-of-plays* (cdr *list-of-plays*))
+    (values (first cell) (second cell) (third cell))))  
